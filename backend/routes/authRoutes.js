@@ -1,8 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { register } = require('../controllers/authController');
-const { login } = require('../controllers/authController');
+const { register,login, getProfile } = require('../controllers/authController');
 const authMiddleware = require('../middleware/authMiddleware');
 
 router.post('/register', register);
@@ -13,5 +12,7 @@ router.get('/test', authMiddleware, (req, res, next) =>{
         message: "You reached the protected route"
     });
 });
+
+router.get('/profile',authMiddleware, getProfile)
 
 module.exports = router;
