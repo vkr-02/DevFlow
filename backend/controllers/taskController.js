@@ -33,14 +33,13 @@ const createTask = async (req, res) => {
 
 const getTasks = async (req, res) => {
     try {
-
         const tasks = await Task.find({
             user: req.userId
         });
 
         return res.status(200).json({
             tasks
-        })
+        });
     } catch (error) {
         return res.status(500).json({
             message: "Server error"
@@ -79,7 +78,7 @@ const updateTask = async (req, res) => {
         return res.status(200).json({
             message: "Task updated successfully",
             task
-        })
+        });
 
     } catch (error) {
         if(error.name === "ValidationError") {
@@ -100,8 +99,38 @@ const updateTask = async (req, res) => {
     }
 };
 
+const deleteTask = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const task = await Task.findOneAndDelete({
+            _id: id,
+            user: req.userId
+        });
+        if(!task) {
+            return res.status(404).json({
+                message: "Task not found"
+            });
+        };
+
+        return res.status(200).json({
+            message: "Task deleted successfully"
+        });
+    } catch (error) {
+        if(error.name === "CastError") {
+            return res.status(400).json({
+                message: "Invalid task ID"
+            });
+        };
+        return res.status(500).json({
+            message: "Server error"
+        });
+    };
+};
+
 module.exports = {
     createTask,
     getTasks,
-    updateTask
+    updateTask,
+    deleteTask
 };
