@@ -31,6 +31,24 @@ const createTask = async (req, res) => {
     
 };
 
+const getTasks = async (req, res) => {
+    try {
+
+        const tasks = await Task.find({
+            user: req.userId
+        });
+
+        return res.status(200).json({
+            tasks
+        })
+    } catch (error) {
+        return res.status(500).json({
+            message: "Server error"
+        });
+    };
+    };
+
 module.exports = {
-    createTask
+    createTask,
+    getTasks
 };
