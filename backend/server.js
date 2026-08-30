@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 
 const authRoutes = require("./routes/authRoutes");
+const taskRoutes = require("./routes/taskRoutes");
 
 
 const app = express();
@@ -18,6 +19,8 @@ app.get("/api/health", (req, res) => {
         message: "Backend is running"
     });
 });
+
+app.use("/api/tasks", taskRoutes);
 
 const PORT = 5000;
 
