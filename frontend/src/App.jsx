@@ -1,25 +1,13 @@
-import { useState, useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
 
 function App () {
-  const [message, setMessage] = useState("");
-
-  useEffect(() => {
-    fetch("http://localhost:5000/api/health")
-    .then((response) => response.json())
-    .then((data) => {
-      setMessage(data.message);
-    })
-    .catch((error) => {
-      console.log("Error:", error);
-    });
-  }, []);
-  
   return(
-    <div>
-      <h1>DevFlow</h1>
-
-      <p>{message}</p>
-    </div>
+    <Routes>
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+    </Routes>
   );
 }
 
