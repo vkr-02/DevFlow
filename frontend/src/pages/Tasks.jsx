@@ -52,6 +52,61 @@ function Tasks() {
             setDescription("");
         }
     }
+
+    const updateTaskStatus = async (taskId, newStatus) => {
+        const token=localStorage.getItem("token");
+
+        const response = await fetch(
+            `http://localhost:5000/api/tasks/${taskId}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    status: newStatus
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if(response.ok) {
+            setTasks((prevTasks) =>
+                prevTasks.map((task) =>
+                task._id === data.task._id ? data.task : task
+                )
+            );
+        }
+
+        console.log(data);
+    }
+
+    const deleteTask = async (taskId) => {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch(
+            `http://localhost:5000/api/tasks/${taskId}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        
+        const data = await response.json();
+
+        if(response.ok) {
+            setTasks((prevTasks) => 
+                prevTasks.filter((task) =>
+                task._id !== taskId
+                )
+            );
+        }
+    }
+
     return (
         <div>
             <h1>My Tasks</h1>
@@ -74,6 +129,17 @@ function Tasks() {
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
                         <p>Status: {task.status}</p>
+                        <select value={task.status}
+                        onChange={(e) => updateTaskStatus(task._id, e.target.value)}
+                        >
+                            <option value="todo">Todo</option>
+                            <option value="in-progress">In-progress</option>
+                            <option value="completed">Completed</option>
+                        </select>
+                        <button type="button"
+                            onClick={() => deleteTask(task._id)}>
+                            Delete
+                        </button>
                     </div>
                 ))
             )}
