@@ -107,9 +107,16 @@ function Tasks() {
         }
     }
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        navigate("/login");
+    }
+
     return (
         <div>
             <h1>My Tasks</h1>
+            <button type="button"
+            onClick={handleLogout}>Logout</button>
 
             <form onSubmit={handleSubmit}>
                 <input type="text"
