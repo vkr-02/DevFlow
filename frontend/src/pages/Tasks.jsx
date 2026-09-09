@@ -30,82 +30,96 @@ function Tasks() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const token = localStorage.getItem("token");
+        try {
+            const token = localStorage.getItem("token");
 
-        const response = await fetch("http://localhost:5000/api/tasks", {
-            method: "POST", 
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({
-                title,
-                description
-            })
-        });
-
-        const data = await response.json();
-
-        if(response.ok) {
-            setTasks((prevTasks) => [...prevTasks, data.task]);
-            setTitle("");
-            setDescription("");
-        }
-    }
-
-    const updateTaskStatus = async (taskId, newStatus) => {
-        const token=localStorage.getItem("token");
-
-        const response = await fetch(
-            `http://localhost:5000/api/tasks/${taskId}`,
-            {
-                method: "PATCH",
+            const response = await fetch("http://localhost:5000/api/tasks", {
+                method: "POST", 
                 headers: {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
-                    status: newStatus
+                    title,
+                    description
                 })
+            });
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                setTasks((prevTasks) => [...prevTasks, data.task]);
+                setTitle("");
+                setDescription("");
             }
-        );
-
-        const data = await response.json();
-
-        if(response.ok) {
-            setTasks((prevTasks) =>
-                prevTasks.map((task) =>
-                task._id === data.task._id ? data.task : task
-                )
-            );
+        } catch (error) {
+            console.log("Create task error", error);
         }
-
-        console.log(data);
     }
+
+    const updateTaskStatus = async (taskId, newStatus) => {
+        try {
+            
+            const token=localStorage.getItem("token");
+            
+            const response = await fetch(
+                `http://localhost:5000/api/tasks/${taskId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        status: newStatus
+                    })
+                }
+            );
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task._id === data.task._id ? data.task : task
+            )
+        );
+    }
+    
+    console.log(data);
+    } catch (error) {
+        console.log("Update task error", error);
+    }
+};
 
     const deleteTask = async (taskId) => {
-        const token = localStorage.getItem("token");
+        try {
 
-        const response = await fetch(
-            `http://localhost:5000/api/tasks/${taskId}`,
-            {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`
+            const token = localStorage.getItem("token");
+            
+            const response = await fetch(
+                `http://localhost:5000/api/tasks/${taskId}`,
+                {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }
-        );
-        
-        const data = await response.json();
-
-        if(response.ok) {
-            setTasks((prevTasks) => 
-                prevTasks.filter((task) =>
-                task._id !== taskId
-                )
             );
-        }
+            
+            const data = await response.json();
+            
+            if(response.ok) {
+                setTasks((prevTasks) => 
+                    prevTasks.filter((task) =>
+                        task._id !== taskId
+            )
+        );
     }
+    } catch (error) {
+        console.log("Delete task error", error);
+    }
+};
 
     const handleLogout = () => {
         localStorage.removeItem("token");
