@@ -5,6 +5,7 @@ function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
+    const [error, setError] = useState("");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -17,13 +18,22 @@ function Tasks() {
         .then(async (response) => {
             const data = await response.json();
 
-            if(!response.ok) {
+            if (response.status === 401) {
                 localStorage.removeItem("token");
                 navigate("/login");
                 return;
             }
+            if (!response.ok) {
+                setError(data.message);
+                return;
+            }
 
             setTasks(data.tasks);
+            setError("");
+        })
+        .catch((error) => {
+            console.log("Network error", error);
+            setError("Unable to connect to server");
         });
     }, [navigate]);
 
@@ -46,21 +56,32 @@ function Tasks() {
             });
             
             const data = await response.json();
-            
-            if(response.ok) {
+
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+                return;
+            }
+            if (!response.ok) {
+                setError(data.message);
+                return;
+            }
+            if (response.ok) {
                 setTasks((prevTasks) => [...prevTasks, data.task]);
                 setTitle("");
                 setDescription("");
+                setError("");
             }
         } catch (error) {
             console.log("Create task error", error);
+            setError("Unable to connect to server");
         }
-    }
+    };
 
     const updateTaskStatus = async (taskId, newStatus) => {
         try {
             
-            const token=localStorage.getItem("token");
+            const token = localStorage.getItem("token");
             
             const response = await fetch(
                 `http://localhost:5000/api/tasks/${taskId}`,
@@ -77,18 +98,29 @@ function Tasks() {
             );
             
             const data = await response.json();
-            
-            if(response.ok) {
+
+            if (response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+                return;
+            }
+            if (response.ok) {
                 setTasks((prevTasks) =>
                     prevTasks.map((task) =>
                         task._id === data.task._id ? data.task : task
-            )
-        );
-    }
+                    )
+                );
+                setError("");
+            }
+            if (!response.ok) {
+                setError(data.message);
+                return;
+            }
     
-    console.log(data);
+    // console.log(data);
     } catch (error) {
         console.log("Update task error", error);
+        setError("Unable to connect to server");
     }
 };
 
@@ -108,23 +140,34 @@ function Tasks() {
             );
             
             const data = await response.json();
-            
-            if(response.ok) {
+
+            if(response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+                return;
+            }
+            if (!response.ok) {
+                setError(data.message);
+                return;
+            }
+            if (response.ok) {
                 setTasks((prevTasks) => 
                     prevTasks.filter((task) =>
                         task._id !== taskId
-            )
-        );
-    }
-    } catch (error) {
-        console.log("Delete task error", error);
-    }
+                    )
+                );
+            setError("");
+            }
+        } catch (error) {
+            console.log("Delete task error", error);
+            setError("Unable to connect to server");
+        }
 };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
         navigate("/login");
-    }
+    };
 
     return (
         <div>
@@ -142,10 +185,12 @@ function Tasks() {
                 <button type="submit">Add Task</button>
             </form>
 
+            {error && <p>{error}</p>}
+
             {tasks.length === 0 ? (
                 <p>No tasks yet</p>
             ) : (
-                tasks.map((task) => (
+                tasks.map((task) => (   
                     <div key={task._id}>
                         <h3>{task.title}</h3>
                         <p>{task.description}</p>
@@ -164,6 +209,7 @@ function Tasks() {
                     </div>
                 ))
             )}
+            
         </div>
     );
 }
