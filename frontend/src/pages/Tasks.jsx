@@ -104,6 +104,10 @@ function Tasks() {
                 navigate("/login");
                 return;
             }
+            if (!response.ok) {
+                setError(data.message);
+                return;
+            }
             if (response.ok) {
                 setTasks((prevTasks) =>
                     prevTasks.map((task) =>
@@ -112,21 +116,14 @@ function Tasks() {
                 );
                 setError("");
             }
-            if (!response.ok) {
-                setError(data.message);
-                return;
-            }
-    
-    // console.log(data);
-    } catch (error) {
-        console.log("Update task error", error);
-        setError("Unable to connect to server");
-    }
-};
+        } catch (error) {
+            console.log("Update task error", error);
+            setError("Unable to connect to server");
+        }
+    };
 
     const deleteTask = async (taskId) => {
         try {
-
             const token = localStorage.getItem("token");
             
             const response = await fetch(
@@ -156,13 +153,13 @@ function Tasks() {
                         task._id !== taskId
                     )
                 );
-            setError("");
+                setError("");
             }
         } catch (error) {
             console.log("Delete task error", error);
             setError("Unable to connect to server");
         }
-};
+    };
 
     const handleLogout = () => {
         localStorage.removeItem("token");
