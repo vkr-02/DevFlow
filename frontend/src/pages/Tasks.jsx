@@ -7,6 +7,11 @@ function Tasks() {
     const [description, setDescription] = useState("");
     const [error, setError] = useState("");
     const [filter, setFilter] = useState("all");
+
+    const [editingTaskId, setEditingTaskId] = useState(null);
+    const [editTitle, setEditTitle] = useState("");
+    const [editDescription, setEditDescription] = useState("");
+
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -167,6 +172,58 @@ function Tasks() {
         navigate("/login");
     };
 
+    const startEditing = (task) => {
+        setEditingTaskId(task._id);
+        setEditTitle(task.title);
+        setEditDescription(task.description);
+    };
+
+    const saveEdit = async (taskId) => {
+        try {
+
+            const token = localStorage.getItem("token");
+            
+            const response = await fetch(
+                `http://localhost:5000/api/tasks/${taskId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title: editTitle,
+                        description: editDescription
+                    })
+                }
+            );
+            
+            const data = await response.json();
+            
+            if(response.status === 401) {
+                localStorage.removeItem("token");
+                navigate("/login");
+                return;
+            }
+            if(!response.ok) {
+                setError(data.message);
+                return;
+            }
+            if(response.ok) {
+                setTasks((prevTasks) =>
+                    prevTasks.map((task) =>
+                        task._id === data.task._id ? data.task : task
+                    )
+                );
+                setError("");
+                setEditingTaskId(null);
+            }
+        } catch (error) {
+            console.log("Edit task error", error);
+            setError("Unable to connect to server");
+        }
+    };
+
     const filteredTasks = tasks.filter((task) => filter === "all" ? true : task.status === filter);
 
     return (
@@ -215,8 +272,28 @@ function Tasks() {
                 <div className="task-list">
                     {filteredTasks.map((task) => (   
                         <div className="task-card" key={task._id}>
-                            <h3>{task.title}</h3>
-                            <p>{task.description}</p>
+                            {editingTaskId === task._id ? (
+                                <div>
+                                    <input type="text"
+                                    value={editTitle}
+                                    onChange={(e) => setEditTitle(e.target.value)}
+                                    />
+
+                                    <input type="text"
+                                    value={editDescription}
+                                    onChange={(e) => setEditDescription(e.target.value)} 
+                                    />
+
+                                    <button type="button"
+                                    onClick={() => saveEdit(task._id)}
+                                    >Save</button>
+                                </div>
+                            ) : (
+                                <div>
+                                    <h3>{task.title}</h3>
+                                    <p>{task.description}</p>
+                                </div>
+                            )}
                             <p>Status: {task.status}</p>
                             <div className="task-actions">
                                 <select value={task.status}
@@ -230,6 +307,9 @@ function Tasks() {
                                     onClick={() => deleteTask(task._id)}>
                                     Delete
                                 </button>
+                                <button type="button"
+                                onClick={() => startEditing(task)}
+                                >Edit</button>
                             </div>
                         </div>
                     ))}
