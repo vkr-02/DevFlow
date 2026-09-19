@@ -6,6 +6,7 @@ function Tasks() {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [error, setError] = useState("");
+    const [filter, setFilter] = useState("all");
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -166,6 +167,8 @@ function Tasks() {
         navigate("/login");
     };
 
+    const filteredTasks = tasks.filter((task) => filter === "all" ? true : task.status === filter);
+
     return (
         <div className="tasks-page">
             <div className="task-header">
@@ -192,13 +195,25 @@ function Tasks() {
                 <button className="add-task-btn" type="submit">Add Task</button>
             </form>
 
+            <label htmlFor="task-filter">Filters</label>
+            <select 
+            id="task-filter"
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+            >
+                <option value="all">All</option>
+                <option value="todo">Todo</option>
+                <option value="in-progress">In-progress</option>
+                <option value="completed">Completed</option>
+            </select>
+
             {error && <p className="error-msg">{error}</p>}
 
-            {tasks.length === 0 ? (
+            {filteredTasks.length === 0 ? (
                 <p>No tasks yet</p>
             ) : (
                 <div className="task-list">
-                    {tasks.map((task) => (   
+                    {filteredTasks.map((task) => (   
                         <div className="task-card" key={task._id}>
                             <h3>{task.title}</h3>
                             <p>{task.description}</p>
